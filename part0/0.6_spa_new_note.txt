@@ -1,0 +1,19 @@
+title Creating new note on SPA page
+
+note over Browser:
+When the user creates a new note
+and click on 'Save', the js-script:
+1) prevent request of form
+2) add new note to notes array
+3) clear the input field
+4) redraw the notes list
+5) send new note to server
+end note
+
+Browser->Server: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+
+note over Server:
+Adds the new note
+end note
+
+Server-->Browser: Status code 201; {"message":"note created"}
