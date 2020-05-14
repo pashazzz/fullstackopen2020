@@ -22,7 +22,7 @@ const App = () => {
 
 const Title = ({text}) => <h2>{text}</h2>
 const Button = ({text, clickHandler}) => <button onClick={clickHandler}>{text}</button>
-const Statistic = ({text, stat}) => <tr><td>{text}</td> <td>{stat}</td></tr>
+const Statistic = ({text, stat}) => <tr><td>{text}</td><td>{stat}</td></tr>
 
 const Statistics = ({good, neutral, bad}) => {
     const all = good + neutral + bad;
