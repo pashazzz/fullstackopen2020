@@ -17,7 +17,7 @@ const App = () => {
       })
   }, [])
 
-  const filterRe = filterName === '' ? null : new RegExp(filterName, 'gi');
+  const filterRe = filterName === '' ? null : new RegExp(filterName, 'i');
   const personsToShow = filterRe === null ? persons : persons.filter(person => filterRe.test(person.name))
 
   const handleFilterName = event => setFilterName(event.target.value)
