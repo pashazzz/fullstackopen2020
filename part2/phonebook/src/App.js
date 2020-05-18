@@ -9,9 +9,8 @@ const App = (props) => {
   const [ newNumber, setNewNumber ] = useState('')
   const [ filterName, setFilterName ] = useState('')
 
-  const personsToShow = filterName === ''
-    ? persons
-    : persons.filter(person => new RegExp(filterName, 'gi').test(person.name))
+  const filterRe = filterName === '' ? null : new RegExp(filterName, 'gi');
+  const personsToShow = filterRe === null ? persons : persons.filter(person => filterRe.test(person.name))
 
   const handleFilterName = event => setFilterName(event.target.value)
   const handleNewName = event => setNewName(event.target.value)
