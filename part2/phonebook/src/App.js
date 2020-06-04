@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import dbApi from './services/dbApi'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
@@ -11,9 +11,9 @@ const App = () => {
   const [ filterName, setFilterName ] = useState('')
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
+    dbApi.getAll()
+      .then(persons => {
+        setPersons(persons)
       })
   }, [])
 
@@ -26,9 +26,11 @@ const App = () => {
   const saveNewPerson = event => {
     event.preventDefault();
 
-    if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
-      return;
+    const exist = persons.find(person => person.name === newName);
+    if (exist !== undefined) {
+      if (!window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        return;
+      }
     }
     if (newName === '') {
       return;
@@ -39,9 +41,27 @@ const App = () => {
       number: newNumber,
     }
 
-    setPersons(persons.concat(newObject));
+    if (exist !== undefined) {
+      dbApi.update(exist.id, newObject)
+        .then(returnedPerson => {
+          setPersons(persons.map(person => person.id === returnedPerson.id ? returnedPerson : person));
+        })
+    } else {
+      dbApi.create(newObject)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson));
+        })
+    }
+
     setNewName('');
     setNewNumber('');
+  }
+
+  const handleRemove = id => {
+    dbApi.remove(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id ))
+      })
   }
 
   return (
@@ -61,7 +81,10 @@ const App = () => {
         </div>
       </form>
       <h2>Numbers</h2>
-      <Persons personsToShow={personsToShow} />
+      <Persons
+        personsToShow={personsToShow}
+        handleRemove={handleRemove}
+      />
     </div>
   )
 }
