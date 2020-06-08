@@ -3,12 +3,15 @@ import dbApi from './services/dbApi'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ filterName, setFilterName ] = useState('')
+  const [ message, setMessage ] = useState(null)
+  const [ messageType, setMessageType ] = useState('')
 
   useEffect(() => {
     dbApi.getAll()
@@ -19,6 +22,12 @@ const App = () => {
 
   const filterRe = filterName === '' ? null : new RegExp(filterName, 'i');
   const personsToShow = filterRe === null ? persons : persons.filter(person => filterRe.test(person.name))
+
+  const displayMessage = (type, message) => {
+    setMessageType(type);
+    setMessage(message)
+    setTimeout( () => {setMessage(null)}, 5000)
+  }
 
   const handleFilterName = event => setFilterName(event.target.value)
   const handleNewName = event => setNewName(event.target.value)
@@ -44,12 +53,21 @@ const App = () => {
     if (exist !== undefined) {
       dbApi.update(exist.id, newObject)
         .then(returnedPerson => {
+          displayMessage('info', `The phone number of '${returnedPerson.name}' was updated`)
           setPersons(persons.map(person => person.id === returnedPerson.id ? returnedPerson : person));
+        })
+        .catch(error => {
+          displayMessage('error', `The record of '${newObject.name}' has already removed from server`)
+          setPersons(persons.filter(person => person.id !== exist.id ))
         })
     } else {
       dbApi.create(newObject)
         .then(returnedPerson => {
+          displayMessage('info', `Added '${returnedPerson.name}'`)
           setPersons(persons.concat(returnedPerson));
+        })
+        .catch(error => {
+          displayMessage('error', `Some error with the creating record of '${newObject.name}'`)
         })
     }
 
@@ -57,16 +75,24 @@ const App = () => {
     setNewNumber('');
   }
 
-  const handleRemove = id => {
+  const handleRemove = (id, name) => {
     dbApi.remove(id)
       .then(() => {
+        displayMessage('info', `Removed '${name}'`)
         setPersons(persons.filter(person => person.id !== id ))
+      })
+      .catch(error => {
+        displayMessage('error', `Information of '${name}' has already removed from server`)
+        dbApi.getAll()
+          .then(persons => { setPersons(persons) })
       })
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification type={messageType} message={message} />
+
       <form>
         <Filter value={filterName} handleFilterName={handleFilterName}/>
         <h2>Add a new</h2>

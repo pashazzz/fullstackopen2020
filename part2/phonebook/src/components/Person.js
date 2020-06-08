@@ -4,7 +4,7 @@ const Person = ({ person, handleRemove }) => {
 
     const wantRemove = () => {
         if (window.confirm(`Delete ${person.name} ?`)) {
-            handleRemove(person.id)
+            handleRemove(person.id, person.name)
         }
     }
 
